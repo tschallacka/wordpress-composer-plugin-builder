@@ -1,0 +1,22 @@
+{
+	"keywords" : [
+		"wordpress",
+		"plugin",
+		"namespace",
+		"building",
+		"publishing",
+		"publish"
+	],
+	"autoload" : {
+		"psr-4" : {
+			"Tschallacka\\Wordpress Composer Plugin Builder\\" : "src"
+		}
+	},
+	"name" : "Tschallacka/Wordpress Composer Plugin builder",
+	"type" : "wordpress-plugin",
+	"description" : "This tool is to help you write wordpress plugins and to \"compile\" them before publishing so all composer dependencies are inserted into the plugins namespace",
+	"license" : "MIT",
+	"require" : {
+		"php" : ">=7.1"
+	}
+}
