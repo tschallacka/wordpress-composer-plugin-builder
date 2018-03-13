@@ -1,4 +1,5 @@
 composer.phar
 .project
+.buildpath
 /.settings/
 /vendor/
