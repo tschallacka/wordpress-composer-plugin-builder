@@ -3,3 +3,4 @@ composer.phar
 .buildpath
 /.settings/
 /vendor/
+/build/

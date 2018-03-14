@@ -34,7 +34,7 @@ class File
     
     /**
      * Get the file objects
-     * @return SplFileInfo
+     * @return \SplFileInfo
      */
     public function getFile()
     {

@@ -7,12 +7,6 @@
 class Config {
     
     /**
-     * This command line param defines wether the build directory should stay in place
-     * @var string
-     */
-    const KEEP_BUILD_ARG = '--keep-build';
-    
-    /**
      * This command line param defines wether to show the help and then exit
      * @var string
      */
@@ -44,12 +38,6 @@ class Config {
     const BUILD_DIRECTORY_ARG = '--build-source=';
     
     /**
-     * Should the build directory be preserved after compiling a zip?
-     * @var boolean
-     */
-    public static $KEEP_DIR = FALSE;
-    
-    /**
      * The root namespace. Either the DEFAULT_NAMESPACE or what's defined
      * by --root-namespace
      * @var string
@@ -62,6 +50,10 @@ class Config {
      */
     public static $DIRECTORY = '';
     
+    /**
+     * Text types to scan for possible namespaces
+     * @var string[]
+     */
     public static $TEXT_TYPES = [
         'txt',
         'htm',

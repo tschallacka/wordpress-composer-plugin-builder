@@ -1,4 +1,5 @@
-<?php namespace Tschallacka\WPBuilder;
+<?php 
+
 function is_cli()
 {
     if ( defined('STDIN') )
@@ -27,12 +28,22 @@ function is_cli()
     
     return false;
 }
-if(is_cli()) {
-    $dir = getcwd();
-    if(is_null($directory) || !$directory) {
-        echo "Error, can't read the current working directory. Please make sure all permissions are set correctly. See http://php.net/manual/en/function.getcwd.php";
-        exit(1);
-    }
-    $builder = new Builder($argv);
-    $builder->run();
+if(!is_cli()) {
+    exit(100);
 }
+    
+$dir = getcwd();
+if(is_null($dir) || !$dir) {
+    echo "Error, can't read the current working directory. Please make sure all permissions are set correctly. See http://php.net/manual/en/function.getcwd.php";
+    exit(1);
+}
+
+$autoload = require_once(__DIR__.'/vendor/autoload.php');
+    
+    
+use Tschallacka\WPBuilder\Config;
+use Tschallacka\WPBuilder\Builder;
+
+Config::$DIRECTORY = $dir;
+$builder = new Builder($argv);
+$builder->run();

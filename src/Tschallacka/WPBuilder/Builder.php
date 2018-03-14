@@ -18,7 +18,7 @@ class Builder
      */
     protected $build_dir;
     
-    protected $gitingores = [];
+    protected $gitignores = [];
     
     protected $allfiles = [];
     
@@ -39,6 +39,7 @@ class Builder
     {
         $this->runIntro();
         $this->checkBuildDir();
+        $this->harvestFiles();
         $this->harvestGitIgnored();
         $this->harvestEditFiles();
         $this->harvestNamespaces();
@@ -46,10 +47,14 @@ class Builder
         $this->createBuildDir();
         $this->generateDirectoryTree();
         $this->doTheMagic();
-        $this->printFile('nons.txt');
-        $this->printModified();
+
+        if(count($this->modified_list)) {
+            $this->printFile('nons.txt');
+            $this->printModified();
+        }
     }
     
+   
     protected function printModified()
     {
         foreach($this->modified_list as $item) {
@@ -70,7 +75,7 @@ class Builder
             
             if(in_array($file->getExtension(), Config::$TEXT_TYPES)) {
                 $contents = file_get_contents($path);
-                foreach($namespace_roots as $root) {
+                foreach($this->namespace_roots as $root) {
                     $contents = $this->replaceNamespace($root, $contents);
                 }
                 $contents = $this->checkManualOverride($file, $contents);
@@ -89,7 +94,7 @@ class Builder
             $haystack = $contents;
             $needle = '<?php';
             $replace = '<?=php namespace '.Config::$ROOT_NAMESPACE.';';
-            $modified_list[] = $new_location;
+            $modified_list[] = $this->getBuildFilepath($file);
             $pos = strpos($haystack, $needle);
             if ($pos !== false) {
                 $contents = substr_replace($haystack, $replace, $pos, strlen($needle));
@@ -112,7 +117,7 @@ class Builder
     {
         
         $this->print("Creating build directory");
-        $created = mkdir($build_dir);
+        $created = mkdir($this->build_dir);
         if(!$created) {
             $this->print("Failed to create build directory. Please check your permissions");
             exit(3);
@@ -123,7 +128,7 @@ class Builder
     protected function getBuildDirectory(File $file) 
     {
         $raw_dir = str_replace(Config::$DIRECTORY, '', dirname($file->getPath()));
-        $new_dir = $build_dir . $raw_dir;
+        $new_dir = $this->build_dir . $raw_dir;
         return $new_dir;
     }
     
@@ -131,7 +136,7 @@ class Builder
     protected function getBuildFilepath(File $file)
     {
         $raw_file = str_replace(Config::$DIRECTORY, '', $file->getPath());
-        $new_file = $build_dir . $raw_file;
+        $new_file = $this->build_dir . $raw_file;
         return $new_file;
     }
     
@@ -146,7 +151,7 @@ class Builder
                 }
             }
         }
-        $namespace_array = array_filter($this->namespace_array);
+        $namespace_array = array_filter($namespace_array);
         $namespace_array = array_unique($namespace_array);
         sort($namespace_array);
         
@@ -191,7 +196,7 @@ class Builder
     protected function harvestEditFiles() 
     {
         $this->print("Filtering lists based on .gitignore entries");
-        $edit_files = array_filter($allfiles, function(File $file) {
+        $this->edit_files = array_filter($this->allfiles, function(File $file) {
             $filepath = $file->getPath();
             foreach($this->ignore_files as $ignore) {
                 if(strpos($filepath, $ignore) === 0) {
@@ -205,17 +210,18 @@ class Builder
     protected function harvestGitIgnored() 
     {
         foreach($this->gitignores as $gitignore) {
-            $this->ignore_files += $this->parse_git_ignore_file($gitignore);
+            
+            $this->ignore_files += $this->parseGitIgnoreFile($gitignore);
         }
         $this->print("These files\directories will be ignored");
-        foreach($ignore_files as $file) {
-            $this->print(sprintf(" - ",$file));
+        foreach($this->ignore_files as $file) {
+            $this->print(sprintf(" - %s",$file));
         }
     }
     
     protected function harvestFiles() 
     {
-        $di = new RecursiveDirectoryIterator(__DIR__,RecursiveDirectoryIterator::SKIP_DOTS);
+        $di = new RecursiveDirectoryIterator(Config::$DIRECTORY,RecursiveDirectoryIterator::SKIP_DOTS);
         $it = new RecursiveIteratorIterator($di);
         
         foreach($it as $file) {
@@ -227,12 +233,12 @@ class Builder
             $this->allfiles[] = new File($file);
         }
         
-        $this->print(sprintf("Found %s gitignore setting files",count($this->gitingores)));
+        $this->print(sprintf("Found %s gitignore setting files",count($this->gitignores)));
     }
     
     protected function getGitIgnores() 
     {
-        return $this->gitingores;
+        return $this->gitignores;
     }
     
     protected function getBuildDir() 
@@ -249,7 +255,9 @@ class Builder
         $this->build_dir = Config::$DIRECTORY . DIRECTORY_SEPARATOR . 'build';
         
         if(file_exists($this->build_dir) && is_dir($this->build_dir)) {
-            $this->print(sprintf("Error, build dir %s already exists. Please remove/rename the build directory manually to continue.\n",$this->build_dir));
+            $this->print(        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            $this->print(sprintf("Error, build dir %s already exists. Please remove/rename\n".
+                                 "the build directory manually to continue.\n",$this->build_dir));
             exit(2);
         }
     }
@@ -299,7 +307,7 @@ class Builder
     {
         $filename = $this->getAssetPath($file);
         if(is_file($filename) && !is_dir($filename)) {
-            return file_get_contents($filepath);
+            return file_get_contents($filename);
         }
         return '';
     }
@@ -321,24 +329,24 @@ class Builder
             $this->runHelp();
             return;
         }
-        if($arg_lowercase == Config::KEEP_BUILD_ARG) {
-            Config::$KEEP_DIR = true;
-            return;
-        }
+
         if(strpos($arg_lowercase, Config::ROOT_NAMESPACE_ARG) === 0) {
             Config::$ROOT_NAMESPACE = substr($arg, strpos($arg, '=') + 1);
             return;
         }
+        
         if(strpos($arg_lowercase, Config::BUILD_DIRECTORY_ARG) === 0) {
             Config::$DIRECTORY = substr($arg, strpos($arg, '=') + 1);
             return;
         }
     }
     
-    protected function setDirectory($dir) 
+    public function setDirectory($dir) 
     {
         if(!is_dir($dir)) {
-            $this->print(sprintf("Error, can't find directory %s. Please make sure you entered the path correctly. See http://php.net/manual/en/function.getcwd.php",$dir));
+            $this->print(sprintf("Error, can't find directory %s.\n".
+                                 "Please make sure you entered the path correctly.\n".
+                                 "See http://php.net/manual/en/function.getcwd.php",$dir));
             exit(1);
         }
         Config::$DIRECTORY = $dir;
@@ -362,25 +370,8 @@ class Builder
         $intro = $this->readFile('intro.txt');
         $parsed = sprintf($intro, Config::KEEP_BUILD_ARG);
         $this->print($parsed);
-        $this->print(sprintf("Starting execution in directory %s\n",Config::$DIRECTORY));
-        $this->print(sprintf("Root namespace = %s\n",Config::$ROOT_NAMESPACE));
-        $this->print(sprintf("%s build directory after build\n",($KEEP_DIR ? "Keeping ": "Removing ")));
+        $this->print("Running with the following settings");
+        $this->print(sprintf("= Starting execution in directory %s",Config::$DIRECTORY));
+        $this->print(sprintf("= Root namespace = %s",Config::$ROOT_NAMESPACE));
     }
 }
-
-   
-    echo "\n\n\n";
-    echo "The following php files were found to NOT contain a namespace.
-The namespace has been added to those files to prevent clashes with
-other plugins who might also use them(class already defined errors etc..)
-This should in theory not affect their functionality, because for all they
-care they are still in the same namespace.
-It might cause problems if they use classes that are in the root namespace
-like DateTime and splFileInfo.
-Please check the below files and add a single \ for when a class from
-the root namespace is instanced that can't be found.
-";
-    foreach($modified_list as $item) {
-        echo " |- $item \n";
-    }
-    ?>

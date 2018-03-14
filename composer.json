@@ -9,14 +9,34 @@
 	],
 	"autoload" : {
 		"psr-4" : {
-			"Tschallacka\\Wordpress Composer Plugin Builder\\" : "src"
+			"Tschallacka\\" : "src/Tschallacka"
 		}
 	},
-	"name" : "Tschallacka/Wordpress Composer Plugin builder",
+	"name" : "Tschallacka/WPBuilder",
 	"type" : "wordpress-plugin",
 	"description" : "This tool is to help you write wordpress plugins and to \"compile\" them before publishing so all composer dependencies are inserted into the plugins namespace",
 	"license" : "MIT",
 	"require" : {
-		"php" : ">=7.1"
+		"php" : ">=7.0"
+	},
+	"authors" : [{
+			"name" : "Tschallacka",
+			"email" : "tschallacka@outlook.com",
+			"homepage" : "https://www.tschallacka.de",
+			"role" : "Author"
+		}, {
+			"name" : "Denis de Bernardy",
+			"role" : "Author of one function",
+			"homepage" : "https://stackoverflow.com/users/417194/denis-de-bernardy"
+		}, {
+			"name" : "Nicolas Chambrier",
+			"role" : "Author of one function",
+			"homepage" : "http://naholyr.fr"
+		}
+	],
+	"support" : {
+		"source" : "https://github.com/tschallacka/wordpress-composer-plugin-builder.git",
+		"wiki" : "https://github.com/tschallacka/wordpress-composer-plugin-builder/wiki",
+		"issues" : "https://github.com/tschallacka/wordpress-composer-plugin-builder/issues"
 	}
 }

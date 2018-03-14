@@ -21,7 +21,6 @@ needed to make sure everything is loaded as expected.
 
 Arguments:
 %s, %s Show this help
-%s Do not delete the build directory after building the plugin
 %s%s The root namespace under which all
    loaded dependencies should be placed.
    Ideally you will name this the same as the root namespace as your plugin

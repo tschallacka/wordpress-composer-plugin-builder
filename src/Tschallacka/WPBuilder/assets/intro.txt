@@ -1,5 +1,4 @@
 Welcome to Tschallacka's Composer to Wordpress Builder.
 ===========================================================================
-Your plugin will be built into the directory build whilst this script runs.
-Afterwards a zip file will be created and the directory deleted.
-If you wish to keep the directory use the flag %s
+Your plugin will be built into the directory build.
+
