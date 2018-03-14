@@ -74,6 +74,7 @@ class Builder
             $new_location = $this->getBuildFilepath($file);
             
             if(in_array($file->getExtension(), Config::$TEXT_TYPES)) {
+                // TODO add exception for composer.json
                 $contents = file_get_contents($path);
                 foreach($this->namespace_roots as $root) {
                     $contents = $this->replaceNamespace($root, $contents);
@@ -93,7 +94,7 @@ class Builder
         if($file->isPhp() && $file->needsManualOverride()) {
             $haystack = $contents;
             $needle = '<?php';
-            $replace = '<?=php namespace '.Config::$ROOT_NAMESPACE.';';
+            $replace = '<?php namespace '.Config::$ROOT_NAMESPACE.';';
             $modified_list[] = $this->getBuildFilepath($file);
             $pos = strpos($haystack, $needle);
             if ($pos !== false) {
@@ -360,7 +361,7 @@ class Builder
     protected function runHelp() 
     {
          $help = $this->readFile('help.txt');
-         $parsed = sprintf($help, Config::HELP, Config::HELP_ALT,Config::KEEP_BUILD_ARG, Config::ROOT_NAMESPACE_ARG, Config::DEFAULT_NAMESPACE, Config::BUILD_DIRECTORY_ARG);
+         $parsed = sprintf($help, Config::HELP, Config::HELP_ALT, Config::ROOT_NAMESPACE_ARG, Config::DEFAULT_NAMESPACE, Config::BUILD_DIRECTORY_ARG);
          echo $parsed;
          exit(0);
     }
@@ -368,7 +369,7 @@ class Builder
     protected function runIntro()
     {   
         $intro = $this->readFile('intro.txt');
-        $parsed = sprintf($intro, Config::KEEP_BUILD_ARG);
+        $parsed = sprintf($intro);
         $this->print($parsed);
         $this->print("Running with the following settings");
         $this->print(sprintf("= Starting execution in directory %s",Config::$DIRECTORY));
