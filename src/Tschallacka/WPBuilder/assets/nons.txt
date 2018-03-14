@@ -1,0 +1,14 @@
+
+
+
+The following php files were found to NOT contain a namespace.
+The namespace has been added to those files to prevent clashes with
+other plugins who might also use them(class already defined errors etc..)
+
+This should in theory not affect their functionality, because for all they
+care they are still in the same namespace.
+It might cause problems if they use classes that are in the root namespace
+like DateTime and splFileInfo.
+
+Please check the below files and add a single \ for when a class from
+the root namespace is instanced that can't be found.
