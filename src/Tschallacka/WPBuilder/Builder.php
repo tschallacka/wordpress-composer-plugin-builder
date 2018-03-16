@@ -71,6 +71,10 @@ class Builder
          * @var $file File
          */
         $root_classes = File::getRootNamespaceClasses();
+        $this->print("Checking following root classes added by libraries");
+        foreach($root_classes as $class) {
+            $this->print(" ==( \\$class");
+        }
         foreach($this->edit_files as $file ) {
             $path = $file->getPath();
             
@@ -92,15 +96,15 @@ class Builder
                         $r = "\\".Config::$ROOT_NAMESPACE."\\$class";
                         $sf = str_replace('\\','\\\\',$f);
                         $sr = str_replace('\\','\\\\',$r);
-                        str_replace([" $f",",$f","($f","\"$sf","'$sf"],
-                                    [" $r",",$r","($r","\"$sr","'$sr"],
-                            $contents
+                        $contents = str_replace([" $f",",$f","($f","\"$sf","'$sf"],
+                                                [" $r",",$r","($r","\"$sr","'$sr"],
+                                                $contents
                          );
                     }
                 }
-                else {
-                    //TODO User prompt for accepting replace. Store preference.
-                }
+                
+                //TODO User prompt for accepting replace. Store preference.
+                
                 $contents = $this->checkManualOverride($file, $contents);
                 file_put_contents($new_location, $contents);
                 $this->print(sprintf("Transformed %s to %s", $path, $new_location));
