@@ -24,6 +24,8 @@ class File
     
     protected $manual_override = false;
     
+    public static $class_to_namespace = [];
+    
     public function __construct(\SplFileInfo $file)
     {
         global $directory;
@@ -56,6 +58,11 @@ class File
         return $this->getFile()->getRealPath();
     }
     
+    public function hasNameSpace() 
+    {
+        return (bool)count($this->namespaces);    
+    }
+    
     public function getNameSpaces()
     {
         return $this->namespaces;
@@ -71,6 +78,13 @@ class File
         return $this->manual_override;
     }
     
+    public static function getRootNamespaceClasses() {
+        if(array_key_exists(Config::$ROOT_NAMESPACE, self::$class_to_namespace)) {
+            return self::$class_to_namespace[Config::$ROOT_NAMESPACE];
+        }
+        return [];
+    }
+    
     /**
      * This function assumes psr-4 is followed.
      * or something similar.
@@ -82,12 +96,19 @@ class File
     protected function loadNameSpace()
     {
         $f = fopen($this->getPath(), 'r');
-        
+        $lastNameSpace = Config::$ROOT_NAMESPACE;
         while(($line = fgets($f)) !== false) {
             $namespace = $this->matchNameSpace($line);
-        
+            
             if($namespace) {
+                $lastNameSpace = $namespace;
                 $this->namespaces[] = $namespace;
+            }
+            if($this->isPhp()) {
+               $class = $this->matchClass($line);
+               if($class) {
+                   $this->addClass($lastNameSpace, $class);
+               }
             }
         }
         fclose($f);
@@ -102,6 +123,24 @@ class File
         }
     }
     
+    
+    
+    protected function addClass($ns, $class) 
+    {
+        if(!array_key_exists($ns, self::$class_to_namespace)) {
+            self::$class_to_namespace[$ns] = [];
+        }
+        self::$class_to_namespace[$ns][] = $class; 
+    }
+    
+    protected function matchClass($line) 
+    {
+        if(preg_match('/(class)(\s+)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)(.*)({*|$)/sm',$line, $m)) {
+            return $m[3];
+        }
+        return null;
+    }
+    
     /**
      * Matches a string to see if there's a namespace declaration in there.
      * https://gist.github.com/naholyr/1885879#file-compare-php-L36
@@ -110,8 +149,8 @@ class File
      */
     protected function matchNameSpace($line)
     {
-        if (preg_match('#namespace\s+(.+?);$#sm', $line, $m)) {
-            return $m[1];
+        if (preg_match('#(namespace)(\\s+)([A-Za-z0-9\\\\]+?)(\\s*);#sm', $line, $m)) {
+            return $m[3];
         }
         return null;
     }

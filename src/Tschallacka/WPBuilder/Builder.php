@@ -26,6 +26,8 @@ class Builder
     
     protected $edit_files = [];
     
+    protected $namespaces = [];
+    
     protected $namespace_roots = [];
     
     protected $modified_list = [];
@@ -68,16 +70,36 @@ class Builder
         /**
          * @var $file File
          */
+        $root_classes = File::getRootNamespaceClasses();
         foreach($this->edit_files as $file ) {
             $path = $file->getPath();
             
             $new_location = $this->getBuildFilepath($file);
             
             if(in_array($file->getExtension(), Config::$TEXT_TYPES)) {
-                // TODO add exception for composer.json
+
                 $contents = file_get_contents($path);
-                foreach($this->namespace_roots as $root) {
+
+                foreach($this->namespaces as $root) {
+                    if(strpos($root,Config::$ROOT_NAMESPACE) === 0) {
+                        continue;
+                    }
                     $contents = $this->replaceNamespace($root, $contents);
+                }
+                if($file->hasNameSpace()) {
+                    foreach($root_classes as $class) {
+                        $f = "\\$class";
+                        $r = "\\".Config::$ROOT_NAMESPACE."\\$class";
+                        $sf = str_replace('\\','\\\\',$f);
+                        $sr = str_replace('\\','\\\\',$r);
+                        str_replace([" $f",",$f","($f","\"$sf","'$sf"],
+                                    [" $r",",$r","($r","\"$sr","'$sr"],
+                            $contents
+                         );
+                    }
+                }
+                else {
+                    //TODO User prompt for accepting replace. Store preference.
                 }
                 $contents = $this->checkManualOverride($file, $contents);
                 file_put_contents($new_location, $contents);
@@ -104,14 +126,38 @@ class Builder
         return $contents;
     }
     
-    protected function replaceNamespace($root, $str) {
-        
-        return preg_replace_callback("/(\\\\*)(".$root.")/",function($matches) {
-            
-            if($matches[2] !== Config::$ROOT_NAMESPACE) {
-                return $matches[1] . Config::$ROOT_NAMESPACE . (empty($matches[1]) ? '\\' : $matches[1]) . $matches[2];
+    protected function replaceNamespace($root, $subject) 
+    {    
+        /**
+         * Replace slashes in namespace with catchall with minimum one to match all use cases
+         */
+        $root = preg_replace_callback('/(\\\\*)/',function($matches){
+            if(isset($matches[1]) && !empty($matches[1])) {
+                return '(\\\\+)';
             }
-        },$str);
+        },$root);
+            
+        /**
+         * There must be at least one slash after the namespace name
+         * @var string $preg_query
+         */
+        $preg_query = "/(\\\\*)(".$root.")(\\\\+)/";
+        
+        /**
+         * 1 full match
+         * 2 matched namespace
+         * 3 slash
+         * 4 optional slash
+         * @var string $match
+         */
+        $match = preg_replace_callback($preg_query,function($matches) {
+            
+            $ret = $matches[1] . Config::$ROOT_NAMESPACE . $matches[3] . $matches[2] . $matches[3];
+            
+            return $ret;
+        },$subject);
+        return $match;
+        
     }
     
     protected function createBuildDir() 
@@ -163,14 +209,17 @@ class Builder
                 $namespace_roots[] = substr($namespace, 0, $slash);
             }
         }
+        $this->namespaces = $namespace_array;
         $this->namespace_roots = array_unique($namespace_roots);
     }
     
     protected function generateDirectoryTree() 
     {
+        
         $this->print("Generating directory tree");
         foreach($this->edit_files as $file) {
             $new_dir = $this->getBuildDirectory($file);
+            $this->print( "----Building dir $new_dir");
             $this->createDirectory($new_dir);   
         }
     }
@@ -202,6 +251,7 @@ class Builder
             foreach($this->ignore_files as $ignore) {
                 if(strpos($filepath, $ignore) === 0) {
                     return false;
+              
                 }
             }
             return strpos($filepath, '.git'.DIRECTORY_SEPARATOR) === false;
@@ -277,7 +327,7 @@ class Builder
             
             $line = trim($line);
             if ($line === '') continue;                 # empty line
-            if($line == 'vendor' || $line == '/vendor') continue; #vendor directory
+            if($line == 'vendor' || strpos($line,'/vendor') === 0) continue; #vendor directory
             if (substr($line, 0, 1) == '#') continue;   # a comment
             if (substr($line, 0, 1) == '!') {           # negated glob
                 $line = substr($line, 1);
@@ -353,7 +403,7 @@ class Builder
         Config::$DIRECTORY = $dir;
     }
     
-    protected function printFile($file) 
+    public function printFile($file) 
     {
         echo $this->readFile($file);    
     }
