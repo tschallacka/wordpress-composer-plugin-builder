@@ -23,11 +23,12 @@
 			"name" : "Tschallacka",
 			"email" : "tschallacka@outlook.com",
 			"homepage" : "https://www.tschallacka.de",
-			"role" : "Author"
+			"role" : "Main Author"
 		}, {
 			"name" : "Denis de Bernardy",
 			"role" : "Author of one function",
-			"homepage" : "https://stackoverflow.com/users/417194/denis-de-bernardy"
+			"homepage" : "https://stackoverflow.com/users/417194/denis-de-bernardymesoconcepts.com",
+			"email" : "d@mesoconcepts.com"
 		}, {
 			"name" : "Nicolas Chambrier",
 			"role" : "Author of one function",
