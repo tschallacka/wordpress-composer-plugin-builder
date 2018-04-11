@@ -92,14 +92,42 @@ class Builder
                 }
                 if($file->hasNameSpace()) {
                     foreach($root_classes as $class) {
-                        $f = "\\$class";
-                        $r = "\\".Config::$ROOT_NAMESPACE."\\$class";
-                        $sf = str_replace('\\','\\\\',$f);
-                        $sr = str_replace('\\','\\\\',$r);
-                        $contents = str_replace([" $f",",$f","($f","\"$sf","'$sf"],
-                                                [" $r",",$r","($r","\"$sr","'$sr"],
-                                                $contents
-                         );
+                        $find = "$class";
+                        $altFind = '\\'.$find;
+                        $replace = "\\".Config::$ROOT_NAMESPACE."\\$class";
+                        $stringifiedFind = str_replace('\\','\\\\', $altFind);
+                        $stringifiedReplace = str_replace('\\','\\\\', $replace);
+                        $contents = str_replace([
+                                                    " $altFind",
+                                                    ",$altFind",
+                                                    "($altFind",
+                                                    " $find",
+                                                    ",$find",
+                                                    "($find",
+                                                    "\"$stringifiedFind\"", 
+                                                    "'$stringifiedFind'", 
+                                                    "\"$find\"", 
+                                                    "'$find'",
+                                                    "class $replace"
+                                                ],
+                                                [
+                                                    " $replace",
+                                                    ",$replace",
+                                                    "($replace",
+                                                    " $replace",
+                                                    ",$replace",
+                                                    "($replace",
+                                                    "\"$stringifiedReplace\"",
+                                                    "'$stringifiedReplace'",
+                                                    "\"$stringifiedReplace\"",
+                                                    "'$stringifiedReplace'",
+                                                    "class $find"
+                                                ],
+                                                $contents,
+                                                $replaceCount);
+                        if($replaceCount) {
+                            $this->print("===(>  Replacing $replaceCount occurences of base class $find with $replace in ".$file->getPath());
+                        }
                     }
                 }
                 
