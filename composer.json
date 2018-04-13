@@ -12,7 +12,7 @@
 			"Tschallacka\\" : "src/Tschallacka"
 		}
 	},
-	"name" : "Tschallacka/WPBuilder",
+	"name" : "tschallacka/wpbuilder",
 	"type" : "wordpress-plugin",
 	"description" : "This tool is to help you write wordpress plugins and to \"compile\" them before publishing so all composer dependencies are inserted into the plugins namespace",
 	"license" : "MIT",
