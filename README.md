@@ -49,15 +49,15 @@ The build plugin will have a PSR-4 autoload command for composer included.
 Make sure that you include the vendor/autoload.php file in your plugin where
 needed to make sure everything is loaded as expected.
 
-Arguments:
--h, --help Show this help
---root-namespace=WordpressPlugin The root namespace under which all
-   loaded dependencies should be placed.
-   Ideally you will name this the same as the root namespace as your plugin
-   as otherwise your plugin will also be moved into this namespace.
---build-source=/users/foo/Desktop/bar  If you wish to execute this script somewhere else 
-   than the current working directory use this argument to define the 
-   location of the source directory. The plugin will also be built in that
-   directory
+Arguments:  
+-h, --help Show this help  
+--root-namespace=WordpressPlugin The root namespace under which all  
+   loaded dependencies should be placed.  
+   Ideally you will name this the same as the root namespace as your plugin  
+   as otherwise your plugin will also be moved into this namespace.  
+--build-source=/users/foo/Desktop/bar  If you wish to execute this script somewhere else   
+   than the current working directory use this argument to define the   
+   location of the source directory. The plugin will also be built in that  
+   directory  
 
 
