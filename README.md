@@ -24,6 +24,7 @@ Then to execute it browse in your favorite cli(bash, cmd, command.com) to the di
 
 It will create a new directory called build in your current working directory, and place all items there in your namespace. It will attempt to rename all references to the namespace  to the namespace you defined.
 
+This program is far from pefect yet, but it should shave of a significant amount of time if you wish to use composer packages in your wordpress plugin, without having to worry about duplicates or older or newer versions of a package hampering your plugin.
 
 **help.txt**
 
