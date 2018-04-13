@@ -38,7 +38,9 @@ if(is_null($dir) || !$dir) {
     exit(1);
 }
 
-$autoload = require_once(__DIR__.'/vendor/autoload.php');
+require_once 'src/Tschallacka/WPBuilder/Builder.php';
+require_once 'src/Tschallacka/WPBuilder/Config.php';    
+require_once 'src/Tschallacka/WPBuilder/File.php';
     
     
 use Tschallacka\WPBuilder\Config;
