@@ -173,8 +173,8 @@ class Builder
          * There must be at least one slash after the namespace name
          * @var string $preg_query
          */
-        $preg_query = "/(\\\\*)(".$root.")(\\\\+)/";
-        
+        $preg_query = "/(\\\\*)(".$root.")(\\\\+|;)/";
+        $this->print($preg_query);
         /**
          * 1 full match
          * 2 matched namespace
@@ -183,11 +183,11 @@ class Builder
          * @var string $match
          */
         $match = preg_replace_callback($preg_query,function($matches) {
-            
-            $ret = $matches[1] . Config::$ROOT_NAMESPACE . $matches[3] . $matches[2] . $matches[3];
+            $ret = $matches[1] . Config::$ROOT_NAMESPACE . $matches[3] . $matches[2] . $matches[4];
             
             return $ret;
         },$subject);
+        
         return $match;
         
     }
