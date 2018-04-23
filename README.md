@@ -7,7 +7,7 @@ How to use it:
 
 run composer with the following command
 
-    composer require tschallacka\wpbuilder
+    composer require tschallacka/wpbuilder
 
 or add in your composer.json the following line an then update.
 ```
